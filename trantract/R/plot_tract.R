@@ -45,6 +45,11 @@ plot_tract <- function( tract, map.zoom = 14 ) {
   map.title <- paste( "Transit stops for census tract", tract, " [zoom level = ", map.zoom, "]" )  
 
   #
+  # Define the color scheme for mapping shp
+  #
+  colors = brewer.pal( 9, "OrRd" )
+
+  #
   # Create the final map
   #
   # Plot only those stops that are in the specified census tract.
