@@ -1,3 +1,23 @@
+#' Plot all the transit-stop locations for a census tract on a map
+#'
+#' Takes a census tract, plots it on a map, and draws all King County
+#' Metro transit stops that are contained within that tract.
+#'
+#' @param tract A string that specifies a US Census Bureau census tract.
+
+#' @param map.zoom Zoom level for the map. Larger numbers are closer to
+#' the earth. Default is 14. Maximum value is 21.
+#' 
+#' @return None. Plot a map that shows the specified census tract and
+#' all the King County Metro transit stops in that tract.
+#' 
+#' @export
+#'
+#' @examples
+#'
+#' plot( 30, map.zoom = 15 )
+#' plot( 53.01 )
+#'
 plot_tract <- function( tract, map.zoom = 14 ) {
 
   #'

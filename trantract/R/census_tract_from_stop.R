@@ -1,3 +1,28 @@
+#' Get the census tract that contains a King Country Metro stop
+#'
+#' Takes a string that specifies a King Country Metro route and returns a string that 
+#' represents the ID for the US Census Bureau census tract that contains
+#' that stop.
+#' 
+#' @param stop A string that specifies a King County Metro stop.
+#' 
+#' @return Returns a string that represents that ID for the US Census Bureau census tract
+#' that contains the specified stop.
+#' 
+#' @export
+#'
+#' @examples
+#'
+#' #
+#' # 8th Ave NW & NW 80th Street
+#' #
+#' census_tract_from_stop( 28100 ),
+#' 
+#' #
+#' # Denny & Aurora
+#' #
+#' census_tract_from_stop( 6235 ),
+#'
 census_tract_from_stop  <- function( stop ) {
 
   #
