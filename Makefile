@@ -14,5 +14,5 @@ install: trantract_1.0.tar.gz
 	Rscript -e 'install.packages( "./trantract", repos = NULL, type = "source" )'
 
 $(VIGNETTE): $(VIGNETTE_SRC) 
-	Rscript -e 'library( devtools ); setwd( "MarKov" ); build_vignettes()'
+	Rscript -e 'library( devtools ); setwd( "trantract" ); build_vignettes()'
 
