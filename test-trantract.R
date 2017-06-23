@@ -4,6 +4,7 @@ library( trantract )
 data( stops )
 data( route.stops.df )
 data( kct.shp.proj )
+is( kct.shp.proj )
 data( tract.demographics.kc )
 head( tract.demographics.kc )
 

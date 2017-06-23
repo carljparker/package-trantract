@@ -11,6 +11,23 @@ vignette: >
 
 # trantract: extract and visualize transit information by census tract #
 
+**NB**: This package requires a dev version of `ggmap()` to avoid to avoid
+the following error:
+
+    Error: GeomRasterAnn was built with an incompatible version of
+    ggproto.  Please reinstall the package that provides this extension.
+
+You can use the following command to install the dev version of
+`ggmap()`:
+
+    install_github("dkahle/ggmap")
+
+See the following URL for more information:
+
+  <http://www.arilamstein.com/blog/2017/01/16/choroplethr-v3-5-3-now-cran/>
+
+---
+
 The trantract package enables you to explore and visualize how King
 Country Metro transit service is related to the spatial characteristics
 of US Census Bureau census tracts. The package also includes a data set
@@ -25,7 +42,7 @@ of service and certain demographic variables.
 
 Load the library
 
-```{r}
+```{r warning = FALSE, message = FALSE, echo = TRUE}
 library( trantract )
 ```
 
@@ -51,12 +68,11 @@ to four route-stops.
 Basically, we are creating a measure of how well King County metro
 serves that tract.
 
-Create a DF that has one column: the census tracts.
+Create a DF that initially has one column: the census tracts.
 
 ```{r}
 service.distro.df <- data.frame( tract = census.tracts )
 
-rm( route.stops.vec )
 route.stops.vec <- numeric( 0 )
 ```
 
@@ -68,24 +84,41 @@ for( tract in service.distro.df$tract ) {
   route.stops.vec[ tract ] <- nrow( route_stops_from_census_tract( tract ) )
 
 }
+```
 
-length( route.stops.vec )
+Add the route-stops as a column to our service DF
+
+```{r}
 service.distro.df$route.stops <- route.stops.vec
+```
 
+See how the level of service is distributed.
+
+```{r}
 hist( service.distro.df$route.stops ) 
-hist( log( service.distro.df$route.stops ) ) 
+```
 
+That is pretty skewed. Try a log transform.
+
+```{r}
+hist( log( service.distro.df$route.stops ) ) 
+```
+
+Get the min and max and look at those census tracts
+
+```{r}
 service.distro.df[ service.distro.df$route.stops == min( service.distro.df$route.stops ), ]
 service.distro.df[ service.distro.df$route.stops == max( service.distro.df$route.stops ), ]
 
 plot_tract( 320.07, map.zoom = 13 )
 plot_tract( 81, map.zoom = 15 )
-
-dim( tract.demographics.kc )
 ```
 
+Now let's look at how our measure of service relates to some demographic
+information.
+
 The Census.Tract column in the demographic data is character, not
-factor. So create a similar column in our data so facilitate the
+factor. So create a similar column in our data to facilitate the
 merge.
 
 ```{r}
@@ -93,15 +126,27 @@ service.distro.df$Census.Tract <- as.character( service.distro.df$tract )
 tract.demographics.kc.routes <- merge( tract.demographics.kc, service.distro.df )  
 ```
 
+First, we'll regress against: total population of the tract, total
+housing units, and total land area.
+
 ```{r}
 mod.tract.multivar <- lm( route.stops ~ Total.Population + Total.Housing.Units + Land.Area.Square.Miles, data = tract.demographics.kc.routes )
 summary( mod.tract.multivar )
 ```
 
+That is not a very compelling model.
+
+Let's just regress against the values for density in our demographic
+data set.
+
 ```{r}
 mod.tract.density <- lm( route.stops ~ Population.Density.Persons.Square.Mile, data = tract.demographics.kc.routes )
 summary( mod.tract.density )
 ```
+
+Interestingly, that doesn't give a strong relationship either. 
+
+Visualize it.
 
 ```{r}
 plot( 
@@ -112,3 +157,8 @@ plot(
      ylab = "log( route-stops )"
     )
 ```
+
+People often say that transit is planned around "urban density" but from
+these simple regressions, it appears that there must other factors as
+well.
+

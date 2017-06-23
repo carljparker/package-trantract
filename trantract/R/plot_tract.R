@@ -41,9 +41,20 @@ plot_tract <- function( tract, map.zoom = 14 ) {
   #
   stops.with.tract <- stops[ !is.na( stops$tract ), ]
 
+  #
+  # Pull out the stops that are in this tract.
+  #
   stops.cen.tract <- stops.with.tract[ as.character( stops.with.tract$tract ) == tract, ]
-  stops.lon.lat <- data.frame( cbind( coordinates( stops.cen.tract )[ , "stop_lon" ], coordinates( stops.cen.tract )[ , "stop_lat" ] ) )
-  names( stops.lon.lat ) <- c( "stop_lon", "stop_lat" )
+
+  #
+  # Determine how many routes serve each stop.
+  #
+  stops.and.routes <- route_stops_from_census_tract( tract ) 
+  routes.per.stop <- vapply( stops.cen.tract$stop_id, function( stop ) nrow( stops.and.routes[ stops.and.routes$stop == stop, ] ), numeric( 1 ) )
+
+  stops.lon.lat <- data.frame( cbind( coordinates( stops.cen.tract )[ , "stop_lon" ], coordinates( stops.cen.tract )[ , "stop_lat" ] ), as.factor( routes.per.stop ) )
+  names( stops.lon.lat ) <- c( "stop_lon", "stop_lat", "num.routes" )
+  head( stops.lon.lat )
 
   #
   # Convert shapefile to format ggmap can work with
@@ -86,17 +97,17 @@ plot_tract <- function( tract, map.zoom = 14 ) {
         aes( x = long, y = lat, group = group ),
         data = polys,
         color = colors[9],
-        fill = colors[6],
+        fill = colors[1],
         alpha = 0.5
       ) +
       labs( x = "Longitude", y = "Latitude" ) +
       geom_point( 
                    aes( 
                         x = stop_lon,
-                        y = stop_lat 
+                        y = stop_lat,
+                        color = num.routes
                       ), 
                    data = stops.lon.lat,
-                   col = "blue"
                 ) +
       labs( title = map.title ) 
 
