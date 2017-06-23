@@ -1,9 +1,9 @@
 Package: trantract
-Title: What the Package Does (one line, title case)
+Title: Analyze and visualize data for King County Metro transit as it relates to census tracts.
 Version: 1.0
 Date: 2017-06-22
 Authors@R: person( "Carl", "Parker", role = c("aut", "cre", "ths"), email = "carljparker@gmail.com" ) 
-Description: What the package does (one paragraph).
+Description: The trantract package contains functions to analyze and visualize data for King County Metro transit as it relates to US Census Bureau census tracts.
 Depends: R (>= 3.2.3), rgdal, rgeos, ggmap, ggplot2, RColorBrewer, maps, knitr
 Suggests: knitr, rmarkdown, BiocStyle
 VignetteBuilder: knitr

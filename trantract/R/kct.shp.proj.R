@@ -8,7 +8,7 @@
 #' 
 #'   <http://www.seattle.gov/dpd/cityplanning/populationdemographics/geographicfilesmaps/2010census/default.htm>
 #'
-#' @name Theta 
+#' @name kct.shp.pro
 #' @usage data( kct.shp.pro ) 
 #' @docType data 
 #' @keywords datasets

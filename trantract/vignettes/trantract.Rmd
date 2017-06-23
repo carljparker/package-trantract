@@ -11,6 +11,104 @@ vignette: >
 
 # trantract: extract and visualize transit information by census tract #
 
+The trantract package enables you to explore and visualize how King
+Country Metro transit service is related to the spatial characteristics
+of US Census Bureau census tracts. The package also includes a data set
+of some demographic information associated with census tracts that can
+be explored as well.
+
+In this vignette, we'll use the functionality and data in the package to
+create a measure of the level of transit service ("route-stops") and see
+how that measure varies across census tracts. We'll then perform some
+simple modeling to see if there is any clear relationship between level
+of service and certain demographic variables.
+
+Load the library
+
+```{r}
+library( trantract )
+```
+
+Load the data sets
+
 ```{r}
 data( stops )
+data( kc.shp.proj )
+data( route.stops.df )
+data( tract.demographics.kc )
+```
+
+Get a list of all census tracts.
+ 
+```{r}
+census.tracts <- unique( stops$tract )
+```
+
+For each tract, get the count of how many route-stops there are in the
+tract. For example, if a stop is served by four routes, that equates
+to four route-stops.
+
+Basically, we are creating a measure of how well King County metro
+serves that tract.
+
+Create a DF that has one column: the census tracts.
+
+```{r}
+service.distro.df <- data.frame( tract = census.tracts )
+
+rm( route.stops.vec )
+route.stops.vec <- numeric( 0 )
+```
+
+For each tract, determine the number of route-stops.
+
+```{r}
+for( tract in service.distro.df$tract ) {
+
+  route.stops.vec[ tract ] <- nrow( route_stops_from_census_tract( tract ) )
+
+}
+
+length( route.stops.vec )
+service.distro.df$route.stops <- route.stops.vec
+
+hist( service.distro.df$route.stops ) 
+hist( log( service.distro.df$route.stops ) ) 
+
+service.distro.df[ service.distro.df$route.stops == min( service.distro.df$route.stops ), ]
+service.distro.df[ service.distro.df$route.stops == max( service.distro.df$route.stops ), ]
+
+plot_tract( 320.07, map.zoom = 13 )
+plot_tract( 81, map.zoom = 15 )
+
+dim( tract.demographics.kc )
+```
+
+The Census.Tract column in the demographic data is character, not
+factor. So create a similar column in our data so facilitate the
+merge.
+
+```{r}
+service.distro.df$Census.Tract <- as.character( service.distro.df$tract )
+tract.demographics.kc.routes <- merge( tract.demographics.kc, service.distro.df )  
+```
+
+```{r}
+mod.tract.multivar <- lm( route.stops ~ Total.Population + Total.Housing.Units + Land.Area.Square.Miles, data = tract.demographics.kc.routes )
+summary( mod.tract.multivar )
+```
+
+```{r}
+mod.tract.density <- lm( route.stops ~ Population.Density.Persons.Square.Mile, data = tract.demographics.kc.routes )
+summary( mod.tract.density )
+```
+
+```{r}
+plot( 
+     tract.demographics.kc.routes$Population.Density.Persons.Square.Mile, 
+     log( tract.demographics.kc.routes$route.stops ), 
+     main = "Level of service vs density",
+     xlab = "Persons / Square Miles",
+     ylab = "log( route-stops )"
+    )
 ```
