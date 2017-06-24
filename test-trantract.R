@@ -26,6 +26,10 @@ help( trantract )
 vignette( "trantract" )
 
 getwd()
-list_files()
 setwd( "./trantract/vignettes" )
+( all_files <- list.files() )
 purl( input = "trantract.Rmd", output = "trantract.R" )
+
+
+# --- END --- #
+
