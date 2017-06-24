@@ -1,5 +1,9 @@
 
-library( trantract )
+rm( list = ls() )
+
+library( "trantract" )
+
+library( "knitr" )
 
 data( stops )
 data( route.stops.df )
@@ -11,6 +15,8 @@ head( tract.demographics.kc )
 head( stops )
 head( route.stops.df )
 
+ls()
+
 census_tract_from_route( 28 )
 census_tract_from_stop( 28100 )
 route_stops_from_census_tract( 30 )
@@ -18,3 +24,8 @@ plot_tract( 30 )
 
 help( trantract )
 vignette( "trantract" )
+
+getwd()
+list_files()
+setwd( "./trantract/vignettes" )
+purl( input = "trantract.Rmd", output = "trantract.R" )
