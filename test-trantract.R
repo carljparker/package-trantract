@@ -1,5 +1,7 @@
+options( "width" = 190 )
 
 rm( list = ls() )
+ls()
 
 library( "trantract" )
 
