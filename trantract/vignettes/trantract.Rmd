@@ -2,7 +2,9 @@
 title: "trantract: extract and visualize transit information by census tract"
 author: "Carl Parker"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output: 
+  rmarkdown::html_vignette:
+    css: styles.css
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
   %\VignetteEngine{knitr::rmarkdown}
@@ -42,6 +44,7 @@ of service and certain demographic variables.
 
 Load the library
 
+
 ```{r warning = FALSE, message = FALSE, echo = TRUE}
 library( trantract )
 ```
@@ -50,7 +53,7 @@ Load the data sets
 
 ```{r}
 data( stops )
-data( kc.shp.proj )
+data( kct.shp.proj )
 data( route.stops.df )
 data( tract.demographics.kc )
 ```
@@ -139,7 +142,8 @@ That is not a very compelling model.
 Let's just regress against the values for density in our demographic
 data set.
 
-```{r}
+```{r set-options, warning = FALSE, message = FALSE, echo = FALSE}
+options( "width" = 120 )
 mod.tract.density <- lm( route.stops ~ Population.Density.Persons.Square.Mile, data = tract.demographics.kc.routes )
 summary( mod.tract.density )
 ```
