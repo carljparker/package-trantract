@@ -156,15 +156,57 @@ tract.demographics.kc.routes$dist.to.cent <-
   )
 
 #
-# The `distGeo()` returns the distance in meters, which is perfectly
-# reasonable. But all the other data is in English units, so even though
-# I feel as though I am committing a sin. I will convert this into feet.
-# God forgive me.
+# The `distGeo()` function returns the distance in meters, which is
+# perfectly reasonable. But all the other data is in English units, so
+# even though I feel as though I am committing a sin. I will convert
+# this into feet.  God forgive me.
 #
-# Google says it is 3.28 feet.
+# Google says it is 3.28 feet to a meter.
 #
-m.to.f <- function( m ) {
+m_to_f <- function( m ) {
   m * 3.28
 }
 
-tract.demographics.kc.routes$dist.to.cent <- m.to.f( tract.demographics.kc.routes$dist.to.cent )
+tract.demographics.kc.routes$dist.to.cent <- m_to_f( tract.demographics.kc.routes$dist.to.cent )
+
+#
+# Let's also use the lat-lon itself, but we will normalize each of them.
+#
+mean.INTPTLAT10 <- mean( tract.demographics.kc.routes$INTPTLAT10 )
+sd.INTPTLAT10   <- sd(   tract.demographics.kc.routes$INTPTLAT10 )
+
+mean.INTPTLON10 <- mean( tract.demographics.kc.routes$INTPTLON10 )
+sd.INTPTLON10   <- sd(   tract.demographics.kc.routes$INTPTLON10 )
+
+norm_lat <- function( lat.arg ) {
+
+  ( lat.arg - mean.INTPTLAT10 ) / sd.INTPTLAT10 
+
+}
+
+norm_lon <- function( lon.arg ) {
+
+  ( lon.arg - mean.INTPTLON10 ) / sd.INTPTLON10 
+
+}
+
+#
+# Here is how the centroid of the internal points of all the tracts
+# compares to Wikipedia canonical GPS location for Seattle.
+#
+mean.INTPTLAT10 
+lat.seattle
+
+mean.INTPTLON10 
+lon.seattle
+
+tract.demographics.kc.routes$norm.intptlat10 <- norm_lat( tract.demographics.kc.routes$INTPTLAT10 )
+
+tract.demographics.kc.routes$norm.intptlon10 <- norm_lon( tract.demographics.kc.routes$INTPTLON10 )
+
+head( tract.demographics.kc.routes$norm.intptlat10 ) 
+sum( tract.demographics.kc.routes$norm.intptlat10 < 0 ) 
+sum( tract.demographics.kc.routes$norm.intptlat10 > 0 ) 
+
+# --- END --- #
+
