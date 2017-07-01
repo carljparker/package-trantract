@@ -66,10 +66,10 @@ mod.tract.density <- lm( route.stops ~ Population.Density, data = tract.demograp
 summary( mod.tract.density )
 
 plot( 
-     tract.demographics.kc.routes$Population, 
+     tract.demographics.kc.routes$Population.Density, 
      log( tract.demographics.kc.routes$route.stops ), 
      main = "Level of service vs density",
-     xlab = "Persons / Square Miles",
+     xlab = "Persons / Square Mile",
      ylab = "log( route-stops )"
     )
 
@@ -126,7 +126,7 @@ is( tract.demographics.kc.routes$Land.Area )
 # to that stop each day--what most people would think of as frequency.)
 #
 
-tract.demographics.kc.routes$route.stop.dens <- tract.demographics.kc.routes$route.stops / tract.demographics.kc.routes$Land.Area
+tract.demographics.kc.routes$route.stops.dens <- tract.demographics.kc.routes$route.stops / tract.demographics.kc.routes$Land.Area
 
 #
 # Now, add a column that represents the distance from the city center.
@@ -207,6 +207,66 @@ tract.demographics.kc.routes$norm.intptlon10 <- norm_lon( tract.demographics.kc.
 head( tract.demographics.kc.routes$norm.intptlat10 ) 
 sum( tract.demographics.kc.routes$norm.intptlat10 < 0 ) 
 sum( tract.demographics.kc.routes$norm.intptlat10 > 0 ) 
+
+#
+# We've set the stage, let's rock a few more regressions.
+#
+
+#
+# First, let's try route.stops.dens (density of route.stops) as the
+# response.
+#
+mod.tract.rs.dens.density <- lm( route.stops.dens ~ Population.Density, data = tract.demographics.kc.routes )
+summary( mod.tract.rs.dens.density )
+
+#
+# Wow. Okay. That made a difference!
+#
+
+plot( 
+     tract.demographics.kc.routes$Population.Density, 
+     tract.demographics.kc.routes$route.stops.dens, 
+     main = "Level of service (density) vs population density",
+     xlab = "Persons / Square Mile",
+     ylab = "log( route-stops-density )"
+    )
+
+intercept <- coef( mod.tract.rs.dens.density )[ "(Intercept)" ]
+slope     <- coef( mod.tract.rs.dens.density )[ "Population.Density" ]
+
+abline( intercept, slope )
+
+#
+# Use log() scale for the y-axis.
+#
+plot( 
+     tract.demographics.kc.routes$Population.Density, 
+     log( tract.demographics.kc.routes$route.stops.dens ), 
+     main = "Level of service (density) vs population density",
+     xlab = "Persons / Square Mile",
+     ylab = "log( route-stops-density )"
+    )
+
+#
+# Show the population density that gets the greatest density of route
+# stops.
+#
+max.rs.dens <- max( tract.demographics.kc.routes$route.stops.dens ) 
+( pop.dens.for.max.service <- tract.demographics.kc.routes[ tract.demographics.kc.routes$route.stops.dens == max.rs.dens, ]$Population.Density )
+
+abline( v = pop.dens.for.max.service, col = "red" )
+
+#
+# Show the route stop density that is given to the tract with the
+# greatest population density.
+#
+max.pop.dens <- max( tract.demographics.kc.routes$Population.Density )
+( rs.dens.for.max.pop.dens <- tract.demographics.kc.routes[ tract.demographics.kc.routes$Population.Density == max.pop.dens, ]$route.stops.dens )
+( log.rs.dens.for.max.pop.dens <- log( rs.dens.for.max.pop.dens ) )
+
+abline( h = log.rs.dens.for.max.pop.dens, col = "blue" )
+
+
 
 # --- END --- #
 
