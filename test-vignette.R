@@ -167,6 +167,9 @@ m_to_f <- function( m ) {
   m * 3.28
 }
 
+#
+# ACTUALLY, WE SHOULD NORMALIZE THESE VALUES!
+#
 tract.demographics.kc.routes$dist.to.cent <- m_to_f( tract.demographics.kc.routes$dist.to.cent )
 
 #
@@ -266,6 +269,55 @@ max.pop.dens <- max( tract.demographics.kc.routes$Population.Density )
 
 abline( h = log.rs.dens.for.max.pop.dens, col = "blue" )
 
+
+#
+# Regress against the normalize lat and lon.
+#
+mod.tract.latlon <- lm( route.stops.dens ~ norm.intptlat10 + norm.intptlon10, data = tract.demographics.kc.routes )
+summary( mod.tract.latlon )
+
+#
+# What is funny is that you can see that transit service falls off
+# rapidly as you head west...into the ocean.
+#
+
+#
+# Give each point one of three colors to represent its service level.
+#
+log.rs.dens.5n  <- fivenum( log( tract.demographics.kc.routes$route.stops.dens ) )
+tukey.low.hinge <- log.rs.dens.5n[ 2 ]
+tukey.up.hinge  <- log.rs.dens.5n[ 4 ]
+
+color.tukey <- function( val ) {
+  ifelse( log( val ) < tukey.low.hinge, "red", ifelse( log( val ) > tukey.up.hinge, "green", "blue" ) )
+}
+
+tract.demographics.kc.routes$color <- color.tukey( tract.demographics.kc.routes$route.stops.dens )
+
+plot( x = tract.demographics.kc.routes$norm.intptlon10, 
+      y = tract.demographics.kc.routes$norm.intptlat10,
+      col = tract.demographics.kc.routes$color,
+      main = "Normalized location of tracts",
+      xlab = "Normalized longitude of tract internal point",
+      ylab = "Normalized latitude of tract internal point"
+    )
+
+abline( h = 0, v = 0, col = "gray", lwd = 2 )
+
+#
+# NEED A LEGEND HERE.
+#
+# CONSIDER SIZE AS A FUNCTION OF POP DENSITY.
+#
+# CONSIDER DOING ONE OF ELIE'S LOW-TECH ANIMATIONS
+#
+
+
+    lines(  1:nc, wss, lwd=3, lty=1, col="red")
+    points( 1:nc, wss, pch=21, bg='yellow', col='black', cex=2)
+    abline( h = 118,   col = "black", lwd = 2, lty = 5)
+    abline( h = 106,   col = "blue", lwd = 2, lty = 1)
+    abline( h =  99,   col = "black", lwd = 2, lty = 5)
 
 
 # --- END --- #
