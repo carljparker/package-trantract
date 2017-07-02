@@ -226,7 +226,10 @@ summary( mod.tract.rs.dens.density )
 # Wow. Okay. That made a difference!
 #
 
-par( mfrow = c( 2,2 ) )
+#
+# Look at the diagnostic plot.
+#
+par( mfrow = c( 2, 2 ) )
 plot( mod.tract.rs.dens.density, 1 )
 plot( mod.tract.rs.dens.density, 2 )
 
@@ -236,12 +239,28 @@ plot( mod.tract.rs.dens.density, 2 )
 mod.tract.rs.dens.density.quad <- lm( route.stops.dens ~ poly( Population.Density, 2 ), data = tract.demographics.kc.routes )
 summary( mod.tract.rs.dens.density.quad )
 
+par( mfrow = c( 2, 2 ) )
+plot( mod.tract.rs.dens.density.quad, 1 )
+plot( mod.tract.rs.dens.density.quad, 2 )
+
 mod.tract.rs.dens.density.cube <- lm( route.stops.dens ~ poly( Population.Density, 3 ), data = tract.demographics.kc.routes )
 summary( mod.tract.rs.dens.density.cube )
 
-#
-# It doesn't seem as though the qu
+par( mfrow = c( 2, 2 ) )
+plot( mod.tract.rs.dens.density.quad, 1 )
+plot( mod.tract.rs.dens.density.quad, 2 )
 
+#
+# It doesn't seem as though the quadratic or cubic functions of
+# population density help us out very much. They incrementally improve
+# the R-Squared, but I am concerned that we are simply fitting the model
+# more "tightly" to the data because of the additional flexibility of a
+# polynomial.
+#
+
+#
+# Going back to the linear model, look at some visualizations.
+#
 plot( 
      tract.demographics.kc.routes$Population.Density, 
      tract.demographics.kc.routes$route.stops.dens, 
@@ -297,6 +316,11 @@ summary( mod.tract.latlon )
 # What is funny is that you can see that transit service falls off
 # rapidly as you head west...into the ocean.
 #
+
+par( mfrow = c( 2, 2 ) )
+plot( mod.tract.latlon, 1 )
+plot( mod.tract.latlon, 2 )
+
 
 #
 # Give each point one of three colors to represent its service level.
