@@ -307,6 +307,13 @@ abline( h = 0, v = 0, col = "gray", lwd = 2, lty = 1 )
 legend( x = "right", pch = 1, legend = c( "High", "Med", "Low" ), col = c( "green", "blue", "red" ), title = "Service level" ) 
 
 #
+# What is interesting about this graph is that you can see instances
+# where you have tracts with high service (green) adjacent to tracts
+# with low service (red). One hopes that this is accounted for my other
+# factors such as a pocket of low population density.
+#
+
+#
 # CONSIDER SIZE AS A FUNCTION OF POP DENSITY.
 #
 # CONSIDER DOING ONE OF ELIE'S LOW-TECH ANIMATIONS
