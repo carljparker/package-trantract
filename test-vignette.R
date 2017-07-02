@@ -302,7 +302,9 @@ plot( x = tract.demographics.kc.routes$norm.intptlon10,
       ylab = "Normalized latitude of tract internal point"
     )
 
-abline( h = 0, v = 0, col = "gray", lwd = 2 )
+abline( h = 0, v = 0, col = "gray", lwd = 2, lty = 1 )
+
+legend( x = "right", legend = c( "High", "Med", "Low" ), col = c( "green", "blue", "red", title = "Service level" ) )
 
 #
 # NEED A LEGEND HERE.
@@ -311,13 +313,6 @@ abline( h = 0, v = 0, col = "gray", lwd = 2 )
 #
 # CONSIDER DOING ONE OF ELIE'S LOW-TECH ANIMATIONS
 #
-
-
-    lines(  1:nc, wss, lwd=3, lty=1, col="red")
-    points( 1:nc, wss, pch=21, bg='yellow', col='black', cex=2)
-    abline( h = 118,   col = "black", lwd = 2, lty = 5)
-    abline( h = 106,   col = "blue", lwd = 2, lty = 1)
-    abline( h =  99,   col = "black", lwd = 2, lty = 5)
 
 
 # --- END --- #
