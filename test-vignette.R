@@ -226,6 +226,22 @@ summary( mod.tract.rs.dens.density )
 # Wow. Okay. That made a difference!
 #
 
+par( mfrow = c( 2,2 ) )
+plot( mod.tract.rs.dens.density, 1 )
+plot( mod.tract.rs.dens.density, 2 )
+
+#
+# Try a quadratic and cubic function of the population density.
+#
+mod.tract.rs.dens.density.quad <- lm( route.stops.dens ~ poly( Population.Density, 2 ), data = tract.demographics.kc.routes )
+summary( mod.tract.rs.dens.density.quad )
+
+mod.tract.rs.dens.density.cube <- lm( route.stops.dens ~ poly( Population.Density, 3 ), data = tract.demographics.kc.routes )
+summary( mod.tract.rs.dens.density.cube )
+
+#
+# It doesn't seem as though the qu
+
 plot( 
      tract.demographics.kc.routes$Population.Density, 
      tract.demographics.kc.routes$route.stops.dens, 
@@ -268,6 +284,7 @@ max.pop.dens <- max( tract.demographics.kc.routes$Population.Density )
 ( log.rs.dens.for.max.pop.dens <- log( rs.dens.for.max.pop.dens ) )
 
 abline( h = log.rs.dens.for.max.pop.dens, col = "blue" )
+
 
 
 #
