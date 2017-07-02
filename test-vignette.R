@@ -267,7 +267,7 @@ AIC( mod.tract.rs.dens.density, mod.tract.rs.dens.density.quad, mod.tract.rs.den
 #
 
 #
-# Going back to the linear model, look at some visualizations.
+# Look at some visualizations.
 #
 plot( 
      tract.demographics.kc.routes$Population.Density, 
@@ -313,7 +313,6 @@ max.pop.dens <- max( tract.demographics.kc.routes$Population.Density )
 abline( h = log.rs.dens.for.max.pop.dens, col = "blue" )
 
 
-
 #
 # Regress against the normalized lat and lon.
 #
@@ -337,8 +336,18 @@ plot( mod.tract.latlon, 2 )
 mod.tract.latlon.quad <- lm( route.stops.dens ~ poly( norm.intptlat10, 2 ) + poly( norm.intptlon10, 2 ), data = tract.demographics.kc.routes )
 summary( mod.tract.latlon.quad )
 
-mod.tract.latlon.quad <- lm( route.stops.dens ~ poly( norm.intptlat10, 3 ) + poly( norm.intptlon10, 3 ), data = tract.demographics.kc.routes )
-summary( mod.tract.latlon.quad )
+par( mfrow = c( 2, 2 ) )
+plot( mod.tract.latlon.quad, 1 )
+plot( mod.tract.latlon.quad, 2 )
+
+mod.tract.latlon.cube <- lm( route.stops.dens ~ poly( norm.intptlat10, 3 ) + poly( norm.intptlon10, 3 ), data = tract.demographics.kc.routes )
+summary( mod.tract.latlon.cube )
+
+par( mfrow = c( 2, 2 ) )
+plot( mod.tract.latlon.cube, 1 )
+plot( mod.tract.latlon.cube, 2 )
+
+AIC( mod.tract.latlon, mod.tract.latlon.quad, mod.tract.latlon.cube )
 
 #
 # Give each point one of three colors to represent its service level.
@@ -378,6 +387,17 @@ legend( x = "right", pch = 1, legend = c( "High", "Med", "Low" ), col = c( "gree
 # CONSIDER DOING ONE OF ELIE'S LOW-TECH ANIMATIONS
 #
 
+#
+# Put it all together.
+#
+mod.tract.density.latlon.cube <- lm( route.stops.dens ~ 
+                                       poly( Population.Density, 3 ) +
+                                       poly( norm.intptlat10, 3 ) + poly( norm.intptlon10, 3 ), 
+                                       data = tract.demographics.kc.routes 
+                                   )
+
+summary( mod.tract.density.latlon.cube )
+AIC( mod.tract.density.latlon.cube )
 
 # --- END --- #
 
