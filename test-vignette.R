@@ -247,8 +247,16 @@ mod.tract.rs.dens.density.cube <- lm( route.stops.dens ~ poly( Population.Densit
 summary( mod.tract.rs.dens.density.cube )
 
 par( mfrow = c( 2, 2 ) )
-plot( mod.tract.rs.dens.density.quad, 1 )
-plot( mod.tract.rs.dens.density.quad, 2 )
+plot( mod.tract.rs.dens.density.cube, 1 )
+plot( mod.tract.rs.dens.density.cube, 2 )
+
+AIC( mod.tract.rs.dens.density, mod.tract.rs.dens.density.quad, mod.tract.rs.dens.density.cube )
+
+#' 
+#' In StatR 501 they said that a difference in AIC > 10 was strong
+#' evidence that a model was better, although I don't like the
+#' complexity of the cubic model.
+#' 
 
 #
 # It doesn't seem as though the quadratic or cubic functions of
@@ -321,6 +329,16 @@ par( mfrow = c( 2, 2 ) )
 plot( mod.tract.latlon, 1 )
 plot( mod.tract.latlon, 2 )
 
+
+# 
+# As with population density, let's try polynomial functions of the
+# covariates.
+#
+mod.tract.latlon.quad <- lm( route.stops.dens ~ poly( norm.intptlat10, 2 ) + poly( norm.intptlon10, 2 ), data = tract.demographics.kc.routes )
+summary( mod.tract.latlon.quad )
+
+mod.tract.latlon.quad <- lm( route.stops.dens ~ poly( norm.intptlat10, 3 ) + poly( norm.intptlon10, 3 ), data = tract.demographics.kc.routes )
+summary( mod.tract.latlon.quad )
 
 #
 # Give each point one of three colors to represent its service level.
