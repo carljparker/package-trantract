@@ -399,5 +399,28 @@ mod.tract.density.latlon.cube <- lm( route.stops.dens ~
 summary( mod.tract.density.latlon.cube )
 AIC( mod.tract.density.latlon.cube )
 
+#' 
+#' When we combined lat-lon with population density, we seem to have lost all the benefit of lat-lon.
+#' The AIC() is not particularly better than using population density alone, nor is the R-Squared. Also,
+#' the errors for the lat-lon terms are high, high.
+#' 
+#' This makes me think that to the extent that lat-lon was working, it was working because it somehow
+#' reflected population density information.
+#' 
+#  I think lat-lon is also problematic because Seattle is an isthmus and
+#  it is a rather strangely shaped isthmus because of Elliott Bay. It
+#  also has two significant inland bodies of water: Lake Union and Green
+#  Lake.
+#
+
+#
+# The next step in this investigation would be to somehow include 
+# service frequency information for each stop. I did not include that in
+# my initial investigation because I didn't see any quick and easy way
+# to extract it from the transit description files published by King
+# County metro.
+#
+
+
 # --- END --- #
 
