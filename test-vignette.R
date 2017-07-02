@@ -271,7 +271,7 @@ abline( h = log.rs.dens.for.max.pop.dens, col = "blue" )
 
 
 #
-# Regress against the normalize lat and lon.
+# Regress against the normalized lat and lon.
 #
 mod.tract.latlon <- lm( route.stops.dens ~ norm.intptlat10 + norm.intptlon10, data = tract.demographics.kc.routes )
 summary( mod.tract.latlon )
@@ -304,10 +304,8 @@ plot( x = tract.demographics.kc.routes$norm.intptlon10,
 
 abline( h = 0, v = 0, col = "gray", lwd = 2, lty = 1 )
 
-legend( x = "right", legend = c( "High", "Med", "Low" ), col = c( "green", "blue", "red", title = "Service level" ) )
+legend( x = "right", pch = 1, legend = c( "High", "Med", "Low" ), col = c( "green", "blue", "red" ), title = "Service level" ) 
 
-#
-# NEED A LEGEND HERE.
 #
 # CONSIDER SIZE AS A FUNCTION OF POP DENSITY.
 #
