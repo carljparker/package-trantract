@@ -417,7 +417,7 @@ legend( x = "right", pch = 1, legend = c( "High", "Med", "Low" ), col = c( "gree
 #
 mod.tract.density.latlon.cube <- lm( route.stops.dens ~ 
                                        poly( Population.Density, 3, raw = TRUE ) +
-                                       poly( norm.intptlat10, 3, raw = TRUE ) + poly( norm.intptlon10, 3 ), 
+                                       poly( norm.intptlat10, 3, raw = TRUE ) + poly( norm.intptlon10, 3, raw = TRUE ), 
                                        data = tract.demographics.kc.routes 
                                    )
 
