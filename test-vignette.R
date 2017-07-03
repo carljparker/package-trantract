@@ -59,7 +59,7 @@ summary( mod.tract.multivar )
 # numbers that, although close to Density, are actually somewhat
 # different.
 #
-# Assuming that the Census knows what they are doing, we'll use their
+# Assuming that the Census Bureau knows what they are doing, we'll use their
 # number rather than calculate our own.
 #
 mod.tract.density <- lm( route.stops ~ Population.Density, data = tract.demographics.kc.routes )
@@ -233,30 +233,6 @@ par( mfrow = c( 2, 2 ) )
 plot( mod.tract.rs.dens.density, 1 )
 plot( mod.tract.rs.dens.density, 2 )
 
-#
-# Try a quadratic and cubic function of the population density.
-#
-mod.tract.rs.dens.density.quad <- lm( route.stops.dens ~ poly( Population.Density, 2 ), data = tract.demographics.kc.routes )
-summary( mod.tract.rs.dens.density.quad )
-
-par( mfrow = c( 2, 2 ) )
-plot( mod.tract.rs.dens.density.quad, 1 )
-plot( mod.tract.rs.dens.density.quad, 2 )
-
-mod.tract.rs.dens.density.cube <- lm( route.stops.dens ~ poly( Population.Density, 3 ), data = tract.demographics.kc.routes )
-summary( mod.tract.rs.dens.density.cube )
-
-par( mfrow = c( 2, 2 ) )
-plot( mod.tract.rs.dens.density.cube, 1 )
-plot( mod.tract.rs.dens.density.cube, 2 )
-
-AIC( mod.tract.rs.dens.density, mod.tract.rs.dens.density.quad, mod.tract.rs.dens.density.cube )
-
-#' 
-#' In StatR 501 they said that a difference in AIC > 10 was strong
-#' evidence that a model was better, although I don't like the
-#' complexity of the cubic model.
-#' 
 
 #
 # It doesn't seem as though the quadratic or cubic functions of
@@ -274,7 +250,7 @@ plot(
      tract.demographics.kc.routes$route.stops.dens, 
      main = "Level of service (density) vs population density",
      xlab = "Persons / Square Mile",
-     ylab = "log( route-stops-density )"
+     ylab = "route-stops-density"
     )
 
 intercept <- coef( mod.tract.rs.dens.density )[ "(Intercept)" ]
@@ -311,6 +287,48 @@ max.pop.dens <- max( tract.demographics.kc.routes$Population.Density )
 ( log.rs.dens.for.max.pop.dens <- log( rs.dens.for.max.pop.dens ) )
 
 abline( h = log.rs.dens.for.max.pop.dens, col = "blue" )
+
+#
+# Try quadratic and cubic functions of the population density.
+#
+mod.tract.rs.dens.density.quad <- lm( route.stops.dens ~ poly( Population.Density, 2, raw = TRUE ), data = tract.demographics.kc.routes )
+summary( mod.tract.rs.dens.density.quad )
+
+par( mfrow = c( 2, 2 ) )
+plot( mod.tract.rs.dens.density.quad, 1 )
+plot( mod.tract.rs.dens.density.quad, 2 )
+
+mod.tract.rs.dens.density.cube <- lm( route.stops.dens ~ poly( Population.Density, 3, raw = TRUE ), data = tract.demographics.kc.routes )
+summary( mod.tract.rs.dens.density.cube )
+
+par( mfrow = c( 2, 2 ) )
+plot( mod.tract.rs.dens.density.cube, 1 )
+plot( mod.tract.rs.dens.density.cube, 2 )
+
+AIC( mod.tract.rs.dens.density, mod.tract.rs.dens.density.quad, mod.tract.rs.dens.density.cube )
+
+#' 
+#' In StatR 501 they said that a difference in AIC > 10 was strong
+#' evidence that a model was better, although I don't like the
+#' complexity of the cubic model.
+#' 
+
+( cube.coef <- coef( mod.tract.rs.dens.density.cube ) )
+cube.coef[ 4 ] 
+cube.coef[ 3 ] 
+cube.coef[ 2 ] 
+cube.coef [ 1 ]
+curve( cube.coef[ 4 ] * ( x ** 3 ) + cube.coef[ 3 ] * ( x ** 2 ) + cube.coef[ 2 ] * ( x ) + cube.coef [ 1 ], xlim = c( 0, 50000 ) )
+curve( cube.coef[ 4 ] * ( x ** 3 ) + cube.coef[ 3 ] * ( x ** 2 ) + cube.coef[ 2 ] * ( x ) + cube.coef [ 1 ], add = TRUE )
+
+curve( cube.coef[ 4 ] * ( x ** 3 ) + cube.coef[ 3 ] * ( x ** 2 ) + cube.coef[ 2 ] * ( x ) + cube.coef [ 1 ], add = TRUE )
+
+x.cube <- 1:50000
+y.cube <- vapply( 1:50000, function( x ) y = cube.coef[ 4 ] * ( x ** 3 ) + cube.coef[ 3 ] * ( x ** 2 ) + cube.coef[ 2 ] * ( x ) + cube.coef [ 1 ], numeric( 1 ) )
+
+points( x.cube, y.cube, cex = 0.10, col = "blue" ) 
+
+
 
 
 #
