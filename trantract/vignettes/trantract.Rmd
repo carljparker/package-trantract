@@ -125,7 +125,7 @@ factor. So create a similar column in our data to facilitate the
 merge.
 
 ```{r}
-service.distro.df$Census.Tract <- as.character( service.distro.df$tract )
+service.distro.df$Tract <- as.character( service.distro.df$tract )
 tract.demographics.kc.routes <- merge( tract.demographics.kc, service.distro.df )  
 ```
 
@@ -133,7 +133,7 @@ First, we'll regress against: total population of the tract, total
 housing units, and total land area.
 
 ```{r}
-mod.tract.multivar <- lm( route.stops ~ Total.Population + Total.Housing.Units + Land.Area.Square.Miles, data = tract.demographics.kc.routes )
+mod.tract.multivar <- lm( route.stops ~ Population + Housing.Units + Land.Area, data = tract.demographics.kc.routes )
 summary( mod.tract.multivar )
 ```
 
@@ -144,7 +144,7 @@ data set.
 
 ```{r set-options, warning = FALSE, message = FALSE, echo = FALSE}
 options( "width" = 120 )
-mod.tract.density <- lm( route.stops ~ Population.Density.Persons.Square.Mile, data = tract.demographics.kc.routes )
+mod.tract.density <- lm( route.stops ~ Population.Density, data = tract.demographics.kc.routes )
 summary( mod.tract.density )
 ```
 
@@ -154,7 +154,7 @@ Visualize it.
 
 ```{r}
 plot( 
-     tract.demographics.kc.routes$Population.Density.Persons.Square.Mile, 
+     tract.demographics.kc.routes$Population.Density, 
      log( tract.demographics.kc.routes$route.stops ), 
      main = "Level of service vs density",
      xlab = "Persons / Square Miles",
