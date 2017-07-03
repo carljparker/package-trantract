@@ -166,3 +166,255 @@ People often say that transit is planned around "urban density" but from
 these simple regressions, it appears that there must other factors as
 well.
 
+Let's keep going.
+
+Change the response variables so that we aren't just looking at number
+of route-stops, but the density of route-stops; not all census tracts
+are the same size. 
+
+Add a column that represents the _density_ of the route.stops in each
+tract. Note, again, that stops in and of themselves are _not_ a good
+measure of service because of the wide variation in the number of
+buses that serve any given stop. (And even this is a simplification
+because we aren't considering number of trips that any given bus makes
+to that stop each day--what most people would think of as frequency.)
+
+```{r}
+tract.demographics.kc.routes$route.stops.dens <- tract.demographics.kc.routes$route.stops / tract.demographics.kc.routes$Land.Area
+```
+
+
+Let's also use the lat-lon, but we will normalize these.
+
+```{r}
+mean.INTPTLAT10 <- mean( tract.demographics.kc.routes$INTPTLAT10 )
+sd.INTPTLAT10   <- sd(   tract.demographics.kc.routes$INTPTLAT10 )
+
+mean.INTPTLON10 <- mean( tract.demographics.kc.routes$INTPTLON10 )
+sd.INTPTLON10   <- sd(   tract.demographics.kc.routes$INTPTLON10 )
+
+norm_lat <- function( lat.arg ) {
+
+  ( lat.arg - mean.INTPTLAT10 ) / sd.INTPTLAT10 
+
+}
+
+norm_lon <- function( lon.arg ) {
+
+  ( lon.arg - mean.INTPTLON10 ) / sd.INTPTLON10 
+
+}
+
+tract.demographics.kc.routes$norm.intptlat10 <- norm_lat( tract.demographics.kc.routes$INTPTLAT10 )
+tract.demographics.kc.routes$norm.intptlon10 <- norm_lon( tract.demographics.kc.routes$INTPTLON10 )
+```
+
+How many tracts are "north" and "south" of zero.
+
+```{r}
+sum( tract.demographics.kc.routes$norm.intptlat10 < 0 ) 
+sum( tract.demographics.kc.routes$norm.intptlat10 > 0 ) 
+```
+
+
+We've set the stage, let's rock a few more regressions.
+
+
+First, let's try route.stops.dens (density of route.stops) as the response.
+
+```{r}
+mod.tract.rs.dens.density <- lm( route.stops.dens ~ Population.Density, data = tract.demographics.kc.routes )
+summary( mod.tract.rs.dens.density )
+```
+
+Wow. Okay. That made a difference! The R-Squared is no 0.24.
+
+Try quadratic and cubic functions of the population density.
+
+```{r}
+mod.tract.rs.dens.density.quad <- lm( route.stops.dens ~ poly( Population.Density, 2, raw = TRUE ), data = tract.demographics.kc.routes )
+summary( mod.tract.rs.dens.density.quad )
+
+mod.tract.rs.dens.density.cube <- lm( route.stops.dens ~ poly( Population.Density, 3, raw = TRUE ), data = tract.demographics.kc.routes )
+summary( mod.tract.rs.dens.density.cube )
+```
+
+How do these three compare when measured against `AIC()`?
+
+```{r}
+AIC( mod.tract.rs.dens.density, mod.tract.rs.dens.density.quad, mod.tract.rs.dens.density.cube )
+```
+
+In StatR 501 they said that a difference in AIC > 10 was strong evidence
+that a model was better. On that basis, we would choose the cubic model.
+
+Look at some visualizations.
+
+```{r}
+plot( 
+     tract.demographics.kc.routes$Population.Density, 
+     tract.demographics.kc.routes$route.stops.dens, 
+     main = "Level of service (density) vs population density",
+     xlab = "Persons / Square Mile",
+     ylab = "route-stops-density"
+    )
+
+intercept <- coef( mod.tract.rs.dens.density )[ "(Intercept)" ]
+slope     <- coef( mod.tract.rs.dens.density )[ "Population.Density" ]
+
+abline( intercept, slope )
+```
+
+Show the population density that gets the greatest density of route
+stops.
+
+```{r}
+( max.rs.dens <- max( tract.demographics.kc.routes$route.stops.dens ) ) 
+( pop.dens.for.max.service <- tract.demographics.kc.routes[ tract.demographics.kc.routes$route.stops.dens == max.rs.dens, ]$Population.Density )
+abline( v = pop.dens.for.max.service, col = "red" )
+```
+
+Show the route stop density that is given to the tract with the
+greatest population density.
+
+```{r}
+( max.pop.dens <- max( tract.demographics.kc.routes$Population.Density ) )
+( rs.dens.for.max.pop.dens <- tract.demographics.kc.routes[ tract.demographics.kc.routes$Population.Density == max.pop.dens, ]$route.stops.dens )
+abline( h = rs.dens.for.max.pop.dens, col = "green" )
+
+
+( cube.coef <- coef( mod.tract.rs.dens.density.cube ) )
+
+x.cube <- 0:50000
+y.cube <- vapply( 0:50000, function( x ) y = cube.coef[ 4 ] * ( x ** 3 ) + cube.coef[ 3 ] * ( x ** 2 ) + cube.coef[ 2 ] * ( x ) + cube.coef [ 1 ], numeric( 1 ) )
+points( x.cube, y.cube, cex = 0.10, col = "blue" ) 
+```
+
+
+Use log() scale for the y-axis.
+
+```{r}
+plot( 
+     tract.demographics.kc.routes$Population.Density, 
+     log( tract.demographics.kc.routes$route.stops.dens ), 
+     main = "Level of service (density) vs population density",
+     xlab = "Persons / Square Mile",
+     ylab = "log( route-stops-density )"
+    )
+
+#
+# Show the population density that gets the greatest density of route
+# stops.
+#
+```{r}
+abline( v = pop.dens.for.max.service, col = "red" )
+```
+
+Show the route stop density that is given to the tract with the
+greatest population density.
+
+```{r}
+( log.rs.dens.for.max.pop.dens <- log( rs.dens.for.max.pop.dens ) )
+abline( h = log.rs.dens.for.max.pop.dens, col = "green" )
+
+log.y.cube <- log( y.cube )
+points( x.cube, log.y.cube, cex = 0.10, col = "blue" ) 
+```
+
+Now, regress against the normalized lat and lon.
+
+```{r}
+mod.tract.latlon <- lm( route.stops.dens ~ norm.intptlat10 + norm.intptlon10, data = tract.demographics.kc.routes )
+summary( mod.tract.latlon )
+```
+
+What is funny is that you can see that transit service falls off rapidly
+as you head west...into the ocean.
+
+
+As with population density, let's try polynomial functions of the
+covariates.
+
+```{r}
+mod.tract.latlon.quad <- lm( route.stops.dens ~ poly( norm.intptlat10, 2, raw = TRUE ) + poly( norm.intptlon10, 2, raw = TRUE ), data = tract.demographics.kc.routes )
+summary( mod.tract.latlon.quad )
+
+mod.tract.latlon.cube <- lm( route.stops.dens ~ poly( norm.intptlat10, 3, raw = TRUE ) + poly( norm.intptlon10, 3, raw = TRUE ), data = tract.demographics.kc.routes )
+summary( mod.tract.latlon.cube )
+```
+
+And here are the `AIC()`.
+
+```{r}
+AIC( mod.tract.latlon, mod.tract.latlon.quad, mod.tract.latlon.cube )
+```
+
+Based on the AIC(), the cubic model is outperforming the other two.
+
+Visualize the distribution of service across the lat-lon values.
+
+Give each point one of three colors to represent its service level.
+
+```{r}
+log.rs.dens.5n  <- fivenum( log( tract.demographics.kc.routes$route.stops.dens ) )
+tukey.low.hinge <- log.rs.dens.5n[ 2 ]
+tukey.up.hinge  <- log.rs.dens.5n[ 4 ]
+
+color.tukey <- function( val ) {
+  ifelse( log( val ) < tukey.low.hinge, "red", ifelse( log( val ) > tukey.up.hinge, "green", "blue" ) )
+}
+
+tract.demographics.kc.routes$color <- color.tukey( tract.demographics.kc.routes$route.stops.dens )
+
+plot( x = tract.demographics.kc.routes$norm.intptlon10, 
+      y = tract.demographics.kc.routes$norm.intptlat10,
+      col = tract.demographics.kc.routes$color,
+      main = "Normalized location of tracts",
+      xlab = "Normalized longitude of tract internal point",
+      ylab = "Normalized latitude of tract internal point"
+    )
+
+abline( h = 0, v = 0, col = "gray", lwd = 2, lty = 1 )
+
+legend( x = "right", pch = 1, legend = c( "High", "Med", "Low" ), col = c( "green", "blue", "red" ), title = "Service level" ) 
+```
+
+
+What is interesting about this graph is that you can see instances where
+you have tracts with high service (green) adjacent to tracts with low
+service (red). One hopes that this is accounted for by other factors
+such as a pocket of low population density.
+
+
+
+Put it all together.
+
+```{r}
+mod.tract.density.latlon.cube <- lm( route.stops.dens ~ 
+                                       poly( Population.Density, 3, raw = TRUE ) +
+                                       poly( norm.intptlat10, 3, raw = TRUE ) + poly( norm.intptlon10, 3 ), 
+                                       data = tract.demographics.kc.routes 
+                                   )
+
+summary( mod.tract.density.latlon.cube )
+AIC( mod.tract.density.latlon.cube )
+```
+
+When we combined lat-lon with population density, we seem to have lost
+all the benefit of lat-lon.  The AIC() is not particularly better than
+using population density alone, nor is the R-Squared.  Also, the errors
+for the lat-lon terms are high, high.
+
+This makes me think that to the extent that lat-lon was working, it was
+working because it somehow reflected population density information.
+
+I think lat-lon is also problematic because Seattle is an isthmus--and
+it is a rather strangely shaped isthmus because of Elliott Bay. It also
+has two significant inland bodies of water: Lake Union and Green Lake.
+
+The next step in this investigation would be to somehow include service
+frequency information for each stop. I did not include that in my
+initial investigation because I didn't see any quick and easy way to
+extract it from the transit description files published by King County
+metro.
+
