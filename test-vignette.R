@@ -50,6 +50,10 @@ service.distro.df$Tract <- as.character( service.distro.df$tract )
 tract.demographics.kc.routes <- merge( tract.demographics.kc, service.distro.df )  
 head( tract.demographics.kc.routes ) 
 
+#
+# Try regressing against population, number of housing units, and land
+# area.
+#
 mod.tract.multivar <- lm( route.stops ~ Population + Housing.Units + Land.Area, data = tract.demographics.kc.routes )
 summary( mod.tract.multivar )
 
@@ -118,7 +122,7 @@ head( tract.demographics.kc.routes )
 is( tract.demographics.kc.routes$Land.Area )
 
 #
-# Add a column that represents that _density_ of the route.stops in each
+# Add a column that represents the _density_ of the route.stops in each
 # tract. Note, again, that stops in and of themselves are _not_ a good
 # measure of service because of the wide variation in the number of
 # buses that serve any given stop. (And even this is a simplification
@@ -223,7 +227,7 @@ mod.tract.rs.dens.density <- lm( route.stops.dens ~ Population.Density, data = t
 summary( mod.tract.rs.dens.density )
 
 #
-# Wow. Okay. That made a difference!
+# Wow. Okay. That made a difference! The R-Squared is no 0.24.
 #
 
 #
@@ -233,60 +237,6 @@ par( mfrow = c( 2, 2 ) )
 plot( mod.tract.rs.dens.density, 1 )
 plot( mod.tract.rs.dens.density, 2 )
 
-
-#
-# It doesn't seem as though the quadratic or cubic functions of
-# population density help us out very much. They incrementally improve
-# the R-Squared, but I am concerned that we are simply fitting the model
-# more "tightly" to the data because of the additional flexibility of a
-# polynomial.
-#
-
-#
-# Look at some visualizations.
-#
-plot( 
-     tract.demographics.kc.routes$Population.Density, 
-     tract.demographics.kc.routes$route.stops.dens, 
-     main = "Level of service (density) vs population density",
-     xlab = "Persons / Square Mile",
-     ylab = "route-stops-density"
-    )
-
-intercept <- coef( mod.tract.rs.dens.density )[ "(Intercept)" ]
-slope     <- coef( mod.tract.rs.dens.density )[ "Population.Density" ]
-
-abline( intercept, slope )
-
-#
-# Use log() scale for the y-axis.
-#
-plot( 
-     tract.demographics.kc.routes$Population.Density, 
-     log( tract.demographics.kc.routes$route.stops.dens ), 
-     main = "Level of service (density) vs population density",
-     xlab = "Persons / Square Mile",
-     ylab = "log( route-stops-density )"
-    )
-
-#
-# Show the population density that gets the greatest density of route
-# stops.
-#
-max.rs.dens <- max( tract.demographics.kc.routes$route.stops.dens ) 
-( pop.dens.for.max.service <- tract.demographics.kc.routes[ tract.demographics.kc.routes$route.stops.dens == max.rs.dens, ]$Population.Density )
-
-abline( v = pop.dens.for.max.service, col = "red" )
-
-#
-# Show the route stop density that is given to the tract with the
-# greatest population density.
-#
-max.pop.dens <- max( tract.demographics.kc.routes$Population.Density )
-( rs.dens.for.max.pop.dens <- tract.demographics.kc.routes[ tract.demographics.kc.routes$Population.Density == max.pop.dens, ]$route.stops.dens )
-( log.rs.dens.for.max.pop.dens <- log( rs.dens.for.max.pop.dens ) )
-
-abline( h = log.rs.dens.for.max.pop.dens, col = "blue" )
 
 #
 # Try quadratic and cubic functions of the population density.
@@ -309,30 +259,80 @@ AIC( mod.tract.rs.dens.density, mod.tract.rs.dens.density.quad, mod.tract.rs.den
 
 #' 
 #' In StatR 501 they said that a difference in AIC > 10 was strong
-#' evidence that a model was better, although I don't like the
-#' complexity of the cubic model.
+#' evidence that a model was better. On that basis, we should choose
+#' the cubic model.
 #' 
 
-( cube.coef <- coef( mod.tract.rs.dens.density.cube ) )
-cube.coef[ 4 ] 
-cube.coef[ 3 ] 
-cube.coef[ 2 ] 
-cube.coef [ 1 ]
-curve( cube.coef[ 4 ] * ( x ** 3 ) + cube.coef[ 3 ] * ( x ** 2 ) + cube.coef[ 2 ] * ( x ) + cube.coef [ 1 ], xlim = c( 0, 50000 ) )
-curve( cube.coef[ 4 ] * ( x ** 3 ) + cube.coef[ 3 ] * ( x ** 2 ) + cube.coef[ 2 ] * ( x ) + cube.coef [ 1 ], add = TRUE )
+#
+# Look at some visualizations.
+#
+plot( 
+     tract.demographics.kc.routes$Population.Density, 
+     tract.demographics.kc.routes$route.stops.dens, 
+     main = "Level of service (density) vs population density",
+     xlab = "Persons / Square Mile",
+     ylab = "route-stops-density"
+    )
 
-curve( cube.coef[ 4 ] * ( x ** 3 ) + cube.coef[ 3 ] * ( x ** 2 ) + cube.coef[ 2 ] * ( x ) + cube.coef [ 1 ], add = TRUE )
+intercept <- coef( mod.tract.rs.dens.density )[ "(Intercept)" ]
+slope     <- coef( mod.tract.rs.dens.density )[ "Population.Density" ]
 
-x.cube <- 1:50000
-y.cube <- vapply( 1:50000, function( x ) y = cube.coef[ 4 ] * ( x ** 3 ) + cube.coef[ 3 ] * ( x ** 2 ) + cube.coef[ 2 ] * ( x ) + cube.coef [ 1 ], numeric( 1 ) )
-
-points( x.cube, y.cube, cex = 0.10, col = "blue" ) 
-
-
+abline( intercept, slope )
 
 
 #
-# Regress against the normalized lat and lon.
+# Show the population density that gets the greatest density of route
+# stops.
+#
+( max.rs.dens <- max( tract.demographics.kc.routes$route.stops.dens ) ) 
+( pop.dens.for.max.service <- tract.demographics.kc.routes[ tract.demographics.kc.routes$route.stops.dens == max.rs.dens, ]$Population.Density )
+abline( v = pop.dens.for.max.service, col = "red" )
+
+#
+# Show the route stop density that is given to the tract with the
+# greatest population density.
+#
+( max.pop.dens <- max( tract.demographics.kc.routes$Population.Density ) )
+( rs.dens.for.max.pop.dens <- tract.demographics.kc.routes[ tract.demographics.kc.routes$Population.Density == max.pop.dens, ]$route.stops.dens )
+abline( h = rs.dens.for.max.pop.dens, col = "green" )
+
+
+( cube.coef <- coef( mod.tract.rs.dens.density.cube ) )
+
+x.cube <- 0:50000
+y.cube <- vapply( 0:50000, function( x ) y = cube.coef[ 4 ] * ( x ** 3 ) + cube.coef[ 3 ] * ( x ** 2 ) + cube.coef[ 2 ] * ( x ) + cube.coef [ 1 ], numeric( 1 ) )
+points( x.cube, y.cube, cex = 0.10, col = "blue" ) 
+
+#
+# Use log() scale for the y-axis.
+#
+plot( 
+     tract.demographics.kc.routes$Population.Density, 
+     log( tract.demographics.kc.routes$route.stops.dens ), 
+     main = "Level of service (density) vs population density",
+     xlab = "Persons / Square Mile",
+     ylab = "log( route-stops-density )"
+    )
+
+#
+# Show the population density that gets the greatest density of route
+# stops.
+#
+abline( v = pop.dens.for.max.service, col = "red" )
+
+#
+# Show the route stop density that is given to the tract with the
+# greatest population density.
+#
+( log.rs.dens.for.max.pop.dens <- log( rs.dens.for.max.pop.dens ) )
+abline( h = log.rs.dens.for.max.pop.dens, col = "green" )
+
+log.y.cube <- log( y.cube )
+points( x.cube, log.y.cube, cex = 0.10, col = "blue" ) 
+
+
+#
+# Now, regress against the normalized lat and lon.
 #
 mod.tract.latlon <- lm( route.stops.dens ~ norm.intptlat10 + norm.intptlon10, data = tract.demographics.kc.routes )
 summary( mod.tract.latlon )
@@ -351,14 +351,14 @@ plot( mod.tract.latlon, 2 )
 # As with population density, let's try polynomial functions of the
 # covariates.
 #
-mod.tract.latlon.quad <- lm( route.stops.dens ~ poly( norm.intptlat10, 2 ) + poly( norm.intptlon10, 2 ), data = tract.demographics.kc.routes )
+mod.tract.latlon.quad <- lm( route.stops.dens ~ poly( norm.intptlat10, 2, raw = TRUE ) + poly( norm.intptlon10, 2, raw = TRUE ), data = tract.demographics.kc.routes )
 summary( mod.tract.latlon.quad )
 
 par( mfrow = c( 2, 2 ) )
 plot( mod.tract.latlon.quad, 1 )
 plot( mod.tract.latlon.quad, 2 )
 
-mod.tract.latlon.cube <- lm( route.stops.dens ~ poly( norm.intptlat10, 3 ) + poly( norm.intptlon10, 3 ), data = tract.demographics.kc.routes )
+mod.tract.latlon.cube <- lm( route.stops.dens ~ poly( norm.intptlat10, 3, raw = TRUE ) + poly( norm.intptlon10, 3, raw = TRUE ), data = tract.demographics.kc.routes )
 summary( mod.tract.latlon.cube )
 
 par( mfrow = c( 2, 2 ) )
@@ -367,6 +367,13 @@ plot( mod.tract.latlon.cube, 2 )
 
 AIC( mod.tract.latlon, mod.tract.latlon.quad, mod.tract.latlon.cube )
 
+#
+# Based on the AIC(), the cubic model is outperforming the other two.
+#
+
+#
+# Visualize the distribution of service across the lat-lon values.
+#
 #
 # Give each point one of three colors to represent its service level.
 #
@@ -409,8 +416,8 @@ legend( x = "right", pch = 1, legend = c( "High", "Med", "Low" ), col = c( "gree
 # Put it all together.
 #
 mod.tract.density.latlon.cube <- lm( route.stops.dens ~ 
-                                       poly( Population.Density, 3 ) +
-                                       poly( norm.intptlat10, 3 ) + poly( norm.intptlon10, 3 ), 
+                                       poly( Population.Density, 3, raw = TRUE ) +
+                                       poly( norm.intptlat10, 3, raw = TRUE ) + poly( norm.intptlon10, 3 ), 
                                        data = tract.demographics.kc.routes 
                                    )
 
@@ -418,19 +425,19 @@ summary( mod.tract.density.latlon.cube )
 AIC( mod.tract.density.latlon.cube )
 
 #' 
-#' When we combined lat-lon with population density, we seem to have lost all the benefit of lat-lon.
-#' The AIC() is not particularly better than using population density alone, nor is the R-Squared. Also,
-#' the errors for the lat-lon terms are high, high.
+#' When we combined lat-lon with population density, we seem to have
+#' lost all the benefit of lat-lon.  The AIC() is not particularly
+#' better than using population density alone, nor is the R-Squared.
+#' Also, the errors for the lat-lon terms are high, high.
 #' 
-#' This makes me think that to the extent that lat-lon was working, it was working because it somehow
-#' reflected population density information.
+#' This makes me think that to the extent that lat-lon was working, it
+#' was working because it somehow reflected population density
+#' information.
 #' 
-#  I think lat-lon is also problematic because Seattle is an isthmus and
-#  it is a rather strangely shaped isthmus because of Elliott Bay. It
-#  also has two significant inland bodies of water: Lake Union and Green
-#  Lake.
-#
-
+#  I think lat-lon is also problematic because Seattle is an
+#  isthmus--and it is a rather strangely shaped isthmus because of
+#  Elliott Bay. It also has two significant inland bodies of water: Lake
+#  Union and Green Lake.
 #
 # The next step in this investigation would be to somehow include 
 # service frequency information for each stop. I did not include that in
